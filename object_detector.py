@@ -1,14 +1,11 @@
-import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
 from transformers import pipeline
 
 
-# Load the model
-model_path = "facebook/detr-resnet-50"
-
+# Load DETR model
 object_detector = pipeline(
     "object-detection",
-    model=model_path
+    model="facebook/detr-resnet-50"
 )
 
 
@@ -17,7 +14,7 @@ def draw_boundaring_boxes(image, detections):
     draw_image = image.copy()
     draw = ImageDraw.Draw(draw_image)
 
-    # Medium font size that scales with image size
+    # Medium-sized font
     font_size = max(24, int(draw_image.width / 60))
 
     try:
@@ -36,7 +33,7 @@ def draw_boundaring_boxes(image, detections):
         xmax = int(box["xmax"])
         ymax = int(box["ymax"])
 
-        # Draw bounding box
+        # Bounding box
         draw.rectangle(
             [(xmin, ymin), (xmax, ymax)],
             outline="red",
@@ -48,7 +45,6 @@ def draw_boundaring_boxes(image, detections):
 
         text = f"{label} {score:.2f}"
 
-        # Calculate text size
         bbox = draw.textbbox(
             (0, 0),
             text,
@@ -58,18 +54,18 @@ def draw_boundaring_boxes(image, detections):
         text_width = bbox[2] - bbox[0]
         text_height = bbox[3] - bbox[1]
 
-        # Start label at the top-left of the bounding box
+        # Put label at the top of the bounding box
         text_x = xmin
         text_y = ymin
 
-        # Prevent labels from going outside the image
+        # Keep label inside image
         if text_x + text_width > draw_image.width:
             text_x = draw_image.width - text_width
 
         if text_y + text_height > draw_image.height:
             text_y = draw_image.height - text_height
 
-        # Move label down if it overlaps another label
+        # Avoid overlapping labels
         while any(
             abs(text_y - previous_y) < text_height + 5
             and abs(text_x - previous_x) < text_width
@@ -77,12 +73,11 @@ def draw_boundaring_boxes(image, detections):
         ):
             text_y += text_height + 5
 
-            # If it goes too far down, stop
             if text_y + text_height > draw_image.height:
                 text_y = ymin
                 break
 
-        # Draw label background
+        # Label background
         draw.rectangle(
             [
                 text_x,
@@ -93,7 +88,7 @@ def draw_boundaring_boxes(image, detections):
             fill="red"
         )
 
-        # Draw label text
+        # Label text
         draw.text(
             (text_x, text_y),
             text,
@@ -113,10 +108,8 @@ def detect_objects(image):
     if image is None:
         return None
 
-    # Run object detection
     output = object_detector(image)
 
-    # Draw bounding boxes and labels
     processed_image = draw_boundaring_boxes(
         image,
         output

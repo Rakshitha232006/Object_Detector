@@ -17,7 +17,7 @@ def draw_boundaring_boxes(image, detections):
 
     # Use a smaller font
     try:
-        font = ImageFont.truetype("DejaVuSans.ttf", 32)
+        font = ImageFont.truetype("DejaVuSans.ttf", 50)
     except:
         font = ImageFont.load_default()
 

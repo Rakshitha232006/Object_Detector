@@ -3,6 +3,7 @@ from PIL import Image, ImageDraw, ImageFont
 from transformers import pipeline
 
 
+# Load the model
 model_path = "facebook/detr-resnet-50"
 
 object_detector = pipeline(
@@ -10,14 +11,17 @@ object_detector = pipeline(
     model=model_path
 )
 
+
 def draw_boundaring_boxes(image, detections):
 
     draw_image = image.copy()
     draw = ImageDraw.Draw(draw_image)
 
-    # Use a smaller font
+    # Medium font size that scales with image size
+    font_size = max(24, int(draw_image.width / 60))
+
     try:
-        font = ImageFont.truetype("DejaVuSans.ttf", 50)
+        font = ImageFont.truetype("arial.ttf", font_size)
     except:
         font = ImageFont.load_default()
 
@@ -32,11 +36,11 @@ def draw_boundaring_boxes(image, detections):
         xmax = int(box["xmax"])
         ymax = int(box["ymax"])
 
-        # Bounding box
+        # Draw bounding box
         draw.rectangle(
             [(xmin, ymin), (xmax, ymax)],
             outline="red",
-            width=4
+            width=5
         )
 
         label = detection["label"]
@@ -44,6 +48,7 @@ def draw_boundaring_boxes(image, detections):
 
         text = f"{label} {score:.2f}"
 
+        # Calculate text size
         bbox = draw.textbbox(
             (0, 0),
             text,
@@ -53,16 +58,18 @@ def draw_boundaring_boxes(image, detections):
         text_width = bbox[2] - bbox[0]
         text_height = bbox[3] - bbox[1]
 
-        # Start above the bounding box
+        # Start label at the top-left of the bounding box
         text_x = xmin
-        text_y = ymin - text_height - 5
+        text_y = ymin
 
-        # If there isn't enough space above,
-        # put the label inside the box
-        if text_y < 0:
-            text_y = ymin + 5
+        # Prevent labels from going outside the image
+        if text_x + text_width > draw_image.width:
+            text_x = draw_image.width - text_width
 
-        # Avoid overlapping labels
+        if text_y + text_height > draw_image.height:
+            text_y = draw_image.height - text_height
+
+        # Move label down if it overlaps another label
         while any(
             abs(text_y - previous_y) < text_height + 5
             and abs(text_x - previous_x) < text_width
@@ -70,24 +77,25 @@ def draw_boundaring_boxes(image, detections):
         ):
             text_y += text_height + 5
 
-        # Keep label inside image
-        if text_y + text_height > image.height:
-            text_y = image.height - text_height - 5
+            # If it goes too far down, stop
+            if text_y + text_height > draw_image.height:
+                text_y = ymin
+                break
 
-        # Label background
+        # Draw label background
         draw.rectangle(
             [
                 text_x,
                 text_y,
-                text_x + text_width + 8,
-                text_y + text_height + 5
+                text_x + text_width,
+                text_y + text_height
             ],
             fill="red"
         )
 
-        # Label text
+        # Draw label text
         draw.text(
-            (text_x + 4, text_y + 2),
+            (text_x, text_y),
             text,
             fill="white",
             font=font
@@ -105,79 +113,13 @@ def detect_objects(image):
     if image is None:
         return None
 
+    # Run object detection
     output = object_detector(image)
 
+    # Draw bounding boxes and labels
     processed_image = draw_boundaring_boxes(
         image,
         output
     )
 
     return processed_image
-
-
-st.set_page_config(
-    page_title="Object Detection",
-    page_icon="🔍",
-    layout="centered"
-)
-
-st.title("🔍 Object Detection")
-
-st.write(
-    "Upload an image or turn on the camera when you want to detect objects."
-)
-
-
-input_method = st.radio(
-    "Choose input method:",
-    ["Upload Image", "Camera"],
-    horizontal=True
-)
-
-
-if input_method == "Upload Image":
-
-    uploaded_files = st.file_uploader(
-        "Select image(s)",
-        type=["jpg", "jpeg", "png"],
-        accept_multiple_files=True
-    )
-
-    if uploaded_files:
-
-        if st.button("Detect Objects", type="primary"):
-
-            for uploaded_file in uploaded_files:
-
-                image = Image.open(uploaded_file).convert("RGB")
-
-                st.subheader(uploaded_file.name)
-
-                processed_image = detect_objects(image)
-
-                st.image(
-                    processed_image,
-                    use_container_width=True
-                )
-
-
-else:
-
-    st.write("📷 Turn on your camera only when you want to detect an object.")
-
-    camera_image = st.camera_input(
-        "Take a picture"
-    )
-
-    if camera_image:
-
-        image = Image.open(camera_image).convert("RGB")
-
-        if st.button("Detect Object", type="primary"):
-
-            processed_image = detect_objects(image)
-
-            st.image(
-                processed_image,
-                use_container_width=True
-            )

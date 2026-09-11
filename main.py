@@ -16,51 +16,65 @@ st.set_page_config(
 
 
 # --------------------------------------------------
-# Custom CSS
+# Custom CSS (Matches Gradio dark theme layout)
 # --------------------------------------------------
 
 st.markdown(
     """
     <style>
-
-    /* Main page */
+    /* Main app background */
     .stApp {
         background-color: #0E1117;
     }
 
-    /* File uploader */
+    /* Container border & styling for uploader */
     [data-testid="stFileUploader"] {
-        border: 2px dashed #4A4A4A;
-        border-radius: 8px;
-        background-color: #262730;
-        padding: 20px;
+        background-color: #2B2D30;
+        border: 2px dashed #4E5157;
+        border-radius: 12px;
+        padding: 2rem 1rem;
     }
 
-    /* Submit button */
+    /* Hide default Streamlit subtext inside dropzone (200MB per file...) */
+    [data-testid="stFileUploaderDropzoneInstructions"] > div:nth-child(2) {
+        display: none !important;
+    }
+
+    /* Custom label styling */
+    .field-label {
+        color: #E0E0E0;
+        font-weight: 500;
+        font-size: 0.95rem;
+        margin-bottom: 6px;
+    }
+
+    /* Submit button (Orange) */
     div.stButton > button[kind="primary"] {
-        background-color: #FF5722 !important;
-        color: white !important;
+        background-color: #FF5200 !important;
+        color: #FFFFFF !important;
         border-radius: 8px;
-        height: 3em;
-        width: 100%;
+        height: 3.2em;
+        font-size: 1.1rem;
+        font-weight: 600;
         border: none;
     }
+    div.stButton > button[kind="primary"]:hover {
+        background-color: #E04800 !important;
+    }
 
-    /* Clear button */
+    /* Clear button (Gray) */
     div.stButton > button[kind="secondary"] {
-        background-color: #4A4A4A !important;
-        color: white !important;
+        background-color: #4E5157 !important;
+        color: #FFFFFF !important;
         border-radius: 8px;
-        height: 3em;
-        width: 100%;
+        height: 3.2em;
+        font-size: 1.1rem;
+        font-weight: 600;
         border: none;
     }
-
-    /* Camera button */
-    div.stButton > button {
-        border-radius: 8px;
+    div.stButton > button[kind="secondary"]:hover {
+        background-color: #3D4045 !important;
     }
-
     </style>
     """,
     unsafe_allow_html=True
@@ -76,42 +90,30 @@ if "processed_images" not in st.session_state:
 
 
 # --------------------------------------------------
-# Heading
+# UI Component Layout
 # --------------------------------------------------
 
-st.markdown("# 🔍 Object Detection")
+# Header label
+st.markdown('<div class="field-label">Select an image</div>', unsafe_allow_html=True)
 
-st.write(
-    "Upload images or use the camera to detect objects using DETR."
-)
-
-
-# --------------------------------------------------
-# Image upload
-# --------------------------------------------------
-
-st.markdown("**Select image(s)**")
-
+# Image upload dropzone
 uploaded_files = st.file_uploader(
-    "Drop Image Here - or - Click to Upload",
+    "Drop Image Here\n- or -\nClick to Upload",
     type=["jpg", "jpeg", "png"],
     accept_multiple_files=True,
     label_visibility="collapsed"
 )
 
-
-# --------------------------------------------------
-# Camera
-# --------------------------------------------------
-
+# Optional Camera Input
 camera_image = st.camera_input(
     "📷 Take a picture",
     label_visibility="visible"
 )
 
+st.write("")
 
+# Side-by-side action buttons
 col1, col2 = st.columns(2)
-
 
 with col1:
     clear_clicked = st.button(
@@ -119,7 +121,6 @@ with col1:
         type="secondary",
         use_container_width=True
     )
-
 
 with col2:
     submit_clicked = st.button(
@@ -129,62 +130,34 @@ with col2:
     )
 
 
+# --------------------------------------------------
+# Logic Execution
+# --------------------------------------------------
 
 if clear_clicked:
-
     st.session_state.processed_images = []
-
     st.rerun()
 
-
 if submit_clicked:
-
-
     if uploaded_files:
-
         st.session_state.processed_images = []
-
         for uploaded_file in uploaded_files:
-
             image = Image.open(uploaded_file).convert("RGB")
-
             processed_image = detect_objects(image)
-
-            st.session_state.processed_images.append(
-                processed_image
-            )
-
-
+            st.session_state.processed_images.append(processed_image)
 
     elif camera_image is not None:
-
         st.session_state.processed_images = []
-
         image = Image.open(camera_image).convert("RGB")
-
         processed_image = detect_objects(image)
-
-        st.session_state.processed_images.append(
-            processed_image
-        )
-
-
+        st.session_state.processed_images.append(processed_image)
 
     else:
-
-        st.warning(
-            "Please upload an image or take a picture using the camera."
-        )
-
+        st.warning("Please upload an image or take a picture using the camera.")
 
 if st.session_state.processed_images:
-
     st.markdown("### Processed Image(s)")
-
-    for i, processed_image in enumerate(
-        st.session_state.processed_images
-    ):
-
+    for i, processed_image in enumerate(st.session_state.processed_images):
         st.image(
             processed_image,
             caption=f"Processed Image {i + 1}",

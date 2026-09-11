@@ -10,58 +10,75 @@ st.set_page_config(
     layout="centered"
 )
 
-
 st.title("Object Detection")
-
 st.write(
-    "Upload multiple images or take a picture "
-    "to detect objects using DETR."
+    "Upload images or use the camera to detect objects using DETR."
 )
 
 
-# --------------------------------------------------
-# INPUT SECTION
-# --------------------------------------------------
-
-upload_column, camera_column = st.columns([3, 1])
+if "camera_on" not in st.session_state:
+    st.session_state.camera_on = False
 
 
-with upload_column:
-
-    uploaded_files = st.file_uploader(
-        "Upload images",
-        type=["jpg", "jpeg", "png"],
-        accept_multiple_files=True
-    )
+uploaded_files = st.file_uploader(
+    "Upload images",
+    type=["jpg", "jpeg", "png"],
+    accept_multiple_files=True
+)
 
 
-with camera_column:
+
+if not st.session_state.camera_on:
+
+    if st.button("📷 Open Camera"):
+        st.session_state.camera_on = True
+        st.rerun()
+
+else:
+
+    st.write("### 📷 Camera")
 
     camera_file = st.camera_input(
-        "Camera"
+        "Take a picture"
     )
 
+    if camera_file is not None:
 
-# --------------------------------------------------
-# COLLECT IMAGES
-# --------------------------------------------------
+        if st.button("❌ Close Camera"):
+            st.session_state.camera_on = False
+            st.rerun()
+
+    else:
+
+        if st.button("❌ Close Camera"):
+            st.session_state.camera_on = False
+            st.rerun()
+
+
 
 images = []
 
-# Add uploaded images
+
+# Uploaded images
 if uploaded_files:
 
     for uploaded_file in uploaded_files:
 
-        image = Image.open(uploaded_file).convert("RGB")
+        image = Image.open(
+            uploaded_file
+        ).convert("RGB")
 
         images.append(
             (uploaded_file.name, image)
         )
 
 
-# Add camera image
-if camera_file is not None:
+# Camera image
+if (
+    st.session_state.camera_on
+    and "camera_file" in locals()
+    and camera_file is not None
+):
 
     camera_image = Image.open(
         camera_file
@@ -71,10 +88,6 @@ if camera_file is not None:
         ("Camera image", camera_image)
     )
 
-
-# --------------------------------------------------
-# SHOW SELECTED IMAGES
-# --------------------------------------------------
 
 if images:
 
@@ -91,11 +104,10 @@ if images:
         )
 
 
-# --------------------------------------------------
-# DETECT BUTTON
-# --------------------------------------------------
 
 if images:
+
+    st.write("")
 
     if st.button(
         "🔍 Detect Objects",

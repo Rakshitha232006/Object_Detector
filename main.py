@@ -6,130 +6,151 @@ from object_detector import detect_objects
 
 st.set_page_config(
     page_title="Object Detection",
-    page_icon="🔍",
+    page_icon="🔎",
     layout="centered"
 )
 
-st.title("Object Detection")
+
+st.title("🔎 Object Detection")
+
 st.write(
-    "Upload images or use the camera to detect objects using DETR."
+    "Upload an image or turn on the camera when you want to detect objects."
 )
 
 
-if "camera_on" not in st.session_state:
-    st.session_state.camera_on = False
+# -----------------------------
+# INPUT AREA
+# -----------------------------
 
+st.markdown("### Select image(s)")
 
+# Main upload box
 uploaded_files = st.file_uploader(
-    "Upload images",
+    "Upload",
     type=["jpg", "jpeg", "png"],
-    accept_multiple_files=True
+    accept_multiple_files=True,
+    label_visibility="collapsed"
 )
 
 
+# Small camera button
+st.markdown(
+    """
+    <style>
+    div[data-testid="stFileUploader"] {
+        margin-bottom: 5px;
+    }
 
-if not st.session_state.camera_on:
+    .camera-title {
+        font-size: 14px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-    if st.button("📷 Open Camera"):
-        st.session_state.camera_on = True
-        st.rerun()
+camera_button = st.button(
+    "📷 Open Camera",
+    use_container_width=False
+)
 
-else:
 
-    st.write("### 📷 Camera")
+camera_image = None
 
-    camera_file = st.camera_input(
-        "Take a picture"
+if camera_button:
+    st.session_state["camera_open"] = True
+
+
+if "camera_open" not in st.session_state:
+    st.session_state["camera_open"] = False
+
+
+# Camera is ONLY created after clicking the button
+if st.session_state["camera_open"]:
+
+    st.markdown("### 📷 Camera")
+
+    camera_image = st.camera_input(
+        "Take a picture",
+        label_visibility="collapsed"
     )
 
-    if camera_file is not None:
+    if st.button("Close Camera"):
+        st.session_state["camera_open"] = False
+        st.rerun()
 
-        if st.button("❌ Close Camera"):
-            st.session_state.camera_on = False
-            st.rerun()
+
+# -----------------------------
+# DETECTION BUTTON
+# -----------------------------
+
+st.write("")
+
+detect_button = st.button(
+    "🔍 Detect Objects",
+    type="primary",
+    use_container_width=True
+)
+
+
+# -----------------------------
+# DETECTION
+# -----------------------------
+
+if detect_button:
+
+    images_to_process = []
+
+    # Uploaded images
+    if uploaded_files:
+
+        for uploaded_file in uploaded_files:
+
+            image = Image.open(uploaded_file).convert("RGB")
+
+            images_to_process.append(
+                (uploaded_file.name, image)
+            )
+
+
+    # Camera image
+    if camera_image is not None:
+
+        image = Image.open(camera_image).convert("RGB")
+
+        images_to_process.append(
+            ("Camera Image", image)
+        )
+
+
+    # Nothing selected
+    if not images_to_process:
+
+        st.warning(
+            "Please upload an image or take a picture using the camera."
+        )
 
     else:
 
-        if st.button("❌ Close Camera"):
-            st.session_state.camera_on = False
-            st.rerun()
-
-
-
-images = []
-
-
-# Uploaded images
-if uploaded_files:
-
-    for uploaded_file in uploaded_files:
-
-        image = Image.open(
-            uploaded_file
-        ).convert("RGB")
-
-        images.append(
-            (uploaded_file.name, image)
+        st.success(
+            f"{len(images_to_process)} image(s) selected."
         )
 
 
-# Camera image
-if (
-    st.session_state.camera_on
-    and "camera_file" in locals()
-    and camera_file is not None
-):
+        # Process every image
+        for image_name, image in images_to_process:
 
-    camera_image = Image.open(
-        camera_file
-    ).convert("RGB")
+            st.subheader(image_name)
 
-    images.append(
-        ("Camera image", camera_image)
-    )
+            with st.spinner("Detecting objects..."):
 
+                processed_image = detect_objects(image)
 
-if images:
-
-    st.subheader(
-        f"{len(images)} image(s) selected"
-    )
-
-    for name, image in images:
-
-        st.image(
-            image,
-            caption=name,
-            width=500
-        )
-
-
-
-if images:
-
-    st.write("")
-
-    if st.button(
-        "🔍 Detect Objects",
-        use_container_width=True
-    ):
-
-        for name, image in images:
-
-            with st.spinner(
-                f"Detecting objects in {name}..."
-            ):
-
-                processed_image = detect_objects(
-                    image
-                )
-
-            st.subheader(
-                f"Result: {name}"
-            )
 
             st.image(
                 processed_image,
                 caption="Processed image",
-                width=700
+                use_container_width=True
             )

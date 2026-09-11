@@ -4,153 +4,189 @@ from PIL import Image
 from object_detector import detect_objects
 
 
+# --------------------------------------------------
+# Page configuration
+# --------------------------------------------------
+
 st.set_page_config(
     page_title="Object Detection",
-    page_icon="🔎",
+    page_icon="🔍",
     layout="centered"
 )
 
 
-st.title("🔎 Object Detection")
+# --------------------------------------------------
+# Custom CSS
+# --------------------------------------------------
 
-st.write(
-    "Upload an image or turn on the camera when you want to detect objects."
+st.markdown(
+    """
+    <style>
+
+    /* Main page */
+    .stApp {
+        background-color: #0E1117;
+    }
+
+    /* File uploader */
+    [data-testid="stFileUploader"] {
+        border: 2px dashed #4A4A4A;
+        border-radius: 8px;
+        background-color: #262730;
+        padding: 20px;
+    }
+
+    /* Submit button */
+    div.stButton > button[kind="primary"] {
+        background-color: #FF5722 !important;
+        color: white !important;
+        border-radius: 8px;
+        height: 3em;
+        width: 100%;
+        border: none;
+    }
+
+    /* Clear button */
+    div.stButton > button[kind="secondary"] {
+        background-color: #4A4A4A !important;
+        color: white !important;
+        border-radius: 8px;
+        height: 3em;
+        width: 100%;
+        border: none;
+    }
+
+    /* Camera button */
+    div.stButton > button {
+        border-radius: 8px;
+    }
+
+    </style>
+    """,
+    unsafe_allow_html=True
 )
 
 
-# -----------------------------
-# INPUT AREA
-# -----------------------------
+# --------------------------------------------------
+# Session state
+# --------------------------------------------------
 
-st.markdown("### Select image(s)")
+if "processed_images" not in st.session_state:
+    st.session_state.processed_images = []
 
-# Main upload box
+
+# --------------------------------------------------
+# Heading
+# --------------------------------------------------
+
+st.markdown("# 🔍 Object Detection")
+
+st.write(
+    "Upload images or use the camera to detect objects using DETR."
+)
+
+
+# --------------------------------------------------
+# Image upload
+# --------------------------------------------------
+
+st.markdown("**Select image(s)**")
+
 uploaded_files = st.file_uploader(
-    "Upload",
+    "Drop Image Here - or - Click to Upload",
     type=["jpg", "jpeg", "png"],
     accept_multiple_files=True,
     label_visibility="collapsed"
 )
 
 
-# Small camera button
-st.markdown(
-    """
-    <style>
-    div[data-testid="stFileUploader"] {
-        margin-bottom: 5px;
-    }
+# --------------------------------------------------
+# Camera
+# --------------------------------------------------
 
-    .camera-title {
-        font-size: 14px;
-        margin-top: 5px;
-        margin-bottom: 5px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-camera_button = st.button(
-    "📷 Open Camera",
-    use_container_width=False
+camera_image = st.camera_input(
+    "📷 Take a picture",
+    label_visibility="visible"
 )
 
 
-camera_image = None
-
-if camera_button:
-    st.session_state["camera_open"] = True
+col1, col2 = st.columns(2)
 
 
-if "camera_open" not in st.session_state:
-    st.session_state["camera_open"] = False
-
-
-# Camera is ONLY created after clicking the button
-if st.session_state["camera_open"]:
-
-    st.markdown("### 📷 Camera")
-
-    camera_image = st.camera_input(
-        "Take a picture",
-        label_visibility="collapsed"
+with col1:
+    clear_clicked = st.button(
+        "Clear",
+        type="secondary",
+        use_container_width=True
     )
 
-    if st.button("Close Camera"):
-        st.session_state["camera_open"] = False
-        st.rerun()
+
+with col2:
+    submit_clicked = st.button(
+        "Submit",
+        type="primary",
+        use_container_width=True
+    )
 
 
-# -----------------------------
-# DETECTION BUTTON
-# -----------------------------
 
-st.write("")
+if clear_clicked:
 
-detect_button = st.button(
-    "🔍 Detect Objects",
-    type="primary",
-    use_container_width=True
-)
+    st.session_state.processed_images = []
+
+    st.rerun()
 
 
-# -----------------------------
-# DETECTION
-# -----------------------------
+if submit_clicked:
 
-if detect_button:
 
-    images_to_process = []
-
-    # Uploaded images
     if uploaded_files:
+
+        st.session_state.processed_images = []
 
         for uploaded_file in uploaded_files:
 
             image = Image.open(uploaded_file).convert("RGB")
 
-            images_to_process.append(
-                (uploaded_file.name, image)
+            processed_image = detect_objects(image)
+
+            st.session_state.processed_images.append(
+                processed_image
             )
 
 
-    # Camera image
-    if camera_image is not None:
+
+    elif camera_image is not None:
+
+        st.session_state.processed_images = []
 
         image = Image.open(camera_image).convert("RGB")
 
-        images_to_process.append(
-            ("Camera Image", image)
+        processed_image = detect_objects(image)
+
+        st.session_state.processed_images.append(
+            processed_image
         )
 
 
-    # Nothing selected
-    if not images_to_process:
+
+    else:
 
         st.warning(
             "Please upload an image or take a picture using the camera."
         )
 
-    else:
 
-        st.success(
-            f"{len(images_to_process)} image(s) selected."
+if st.session_state.processed_images:
+
+    st.markdown("### Processed Image(s)")
+
+    for i, processed_image in enumerate(
+        st.session_state.processed_images
+    ):
+
+        st.image(
+            processed_image,
+            caption=f"Processed Image {i + 1}",
+            use_container_width=True
         )
-
-
-        # Process every image
-        for image_name, image in images_to_process:
-
-            st.subheader(image_name)
-
-            with st.spinner("Detecting objects..."):
-
-                processed_image = detect_objects(image)
-
-
-            st.image(
-                processed_image,
-                caption="Processed image",
-                use_container_width=True
-            )

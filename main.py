@@ -7,6 +7,7 @@ from object_detector import detect_objects
 # --------------------------------------------------
 # Page configuration
 # --------------------------------------------------
+
 st.set_page_config(
     page_title="Object Detection",
     page_icon="🔍",
@@ -15,61 +16,55 @@ st.set_page_config(
 
 
 # --------------------------------------------------
-# Custom CSS
+# CSS
 # --------------------------------------------------
+
 st.markdown(
     """
     <style>
 
-    /* ================================
-       MAIN BACKGROUND
-       ================================ */
-
+    /* Main background */
     .stApp {
         background-color: #0B0F19;
     }
 
     .main .block-container {
-        padding-top: 1rem;
-        padding-bottom: 2rem;
-        max-width: 900px;
+        max-width: 760px;
+        padding-top: 35px;
     }
 
 
-    /* ================================
-       LABEL
-       ================================ */
-
+    /* Label */
     .field-label {
-        color: #C9D1D9;
-        font-size: 14px;
+        color: #E5E7EB;
+        font-size: 15px;
         margin-bottom: 6px;
     }
 
 
-    /* ================================
-       MAIN DROPZONE
-       ================================ */
+    /* --------------------------------------------
+       FILE UPLOADER
+       -------------------------------------------- */
 
     [data-testid="stFileUploader"] {
-        background-color: #21252D !important;
-        border: 1px dashed #4E5157 !important;
+        background-color: #24262C !important;
+        border: 1px dashed #4D5057 !important;
         border-radius: 6px !important;
-        min-height: 280px !important;
         padding: 0 !important;
     }
 
     [data-testid="stFileUploaderDropzone"] {
-        background-color: #21252D !important;
+        background-color: #24262C !important;
         border: none !important;
-        min-height: 230px !important;
+        min-height: 250px !important;
+
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
     }
 
 
-    /* Hide default Streamlit text */
+    /* Hide Streamlit's default text */
 
     [data-testid="stFileUploaderDropzoneInstructions"] span {
         display: none !important;
@@ -80,107 +75,138 @@ st.markdown(
     }
 
 
-    /* Our upload area text */
+    /* Upload arrow */
 
     [data-testid="stFileUploaderDropzoneInstructions"]::before {
         content: "↑";
         display: block;
+        text-align: center;
+
         color: #E5E7EB;
         font-size: 42px;
         font-weight: 300;
+
         margin-bottom: 8px;
     }
 
+
+    /* Upload text */
+
     [data-testid="stFileUploaderDropzoneInstructions"]::after {
         content: "Drop Image Here\\A - or -\\A Click to Upload";
+
         white-space: pre-wrap;
+
         display: block;
         text-align: center;
+
         color: #E5E7EB;
+
         font-size: 16px;
         font-weight: 500;
+
         line-height: 1.6;
     }
 
 
-    /* Hide browse button */
+    /* Hide Browse button */
 
     [data-testid="stFileUploaderDropzone"] button {
         display: none !important;
     }
 
 
-    /* ================================
-       FOOTER ICON AREA
-       ================================ */
+    /* --------------------------------------------
+       ICON BAR
+       -------------------------------------------- */
 
-    .icon-area {
-        height: 42px;
-        background-color: #21252D;
-        border-top: 1px solid #363940;
+    .icon-bar {
+        height: 40px;
+
+        background-color: #24262C;
+
+        border-top: 1px solid #373A40;
+
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 30px;
+
+        gap: 24px;
+
+        color: #9CA3AF;
     }
 
 
-    /* ================================
-       CAMERA WIDGET
-       ================================ */
-
-    [data-testid="stCameraInput"] {
-        background: transparent !important;
-        border: none !important;
-        padding: 0 !important;
-    }
-
-    [data-testid="stCameraInput"] label {
-        display: none !important;
-    }
-
-    [data-testid="stCameraInput"] button {
-        background: transparent !important;
-        border: none !important;
-        color: #9CA3AF !important;
-        font-size: 24px !important;
-        padding: 2px !important;
-    }
-
-
-    /* ================================
-       BUTTONS
-       ================================ */
+    /* --------------------------------------------
+       ICON BUTTONS
+       -------------------------------------------- */
 
     div.stButton > button {
-        height: 42px !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+
+    .icon-button button {
+        background: transparent !important;
+
+        color: #9CA3AF !important;
+
+        font-size: 20px !important;
+
+        padding: 0 !important;
+
+        height: 30px !important;
+
+        min-height: 30px !important;
+    }
+
+
+    .icon-button button:hover {
+        color: #FF5200 !important;
+    }
+
+
+    /* --------------------------------------------
+       CAMERA
+       -------------------------------------------- */
+
+    [data-testid="stCameraInput"] {
+        margin-top: 10px;
+    }
+
+
+    /* --------------------------------------------
+       ACTION BUTTONS
+       -------------------------------------------- */
+
+    div.stButton > button[kind="secondary"] {
+        background-color: #555761 !important;
+        color: white !important;
+
         border-radius: 6px !important;
+
+        height: 42px !important;
+
         font-size: 16px !important;
         font-weight: 600 !important;
     }
 
 
-    /* Clear */
-
-    div.stButton > button[kind="secondary"] {
-        background-color: #555761 !important;
-        color: white !important;
-        border: none !important;
-    }
-
-
-    /* Submit */
-
     div.stButton > button[kind="primary"] {
         background-color: #FF5200 !important;
         color: white !important;
-        border: none !important;
+
+        border-radius: 6px !important;
+
+        height: 42px !important;
+
+        font-size: 16px !important;
+        font-weight: 600 !important;
     }
 
 
-    /* ================================
-       REMOVE EXTRA SPACING
-       ================================ */
+    /* Remove unnecessary uploader bottom spacing */
 
     [data-testid="stFileUploader"] section {
         padding-bottom: 0 !important;
@@ -199,8 +225,8 @@ st.markdown(
 if "processed_images" not in st.session_state:
     st.session_state.processed_images = []
 
-if "camera_open" not in st.session_state:
-    st.session_state.camera_open = False
+if "show_camera" not in st.session_state:
+    st.session_state.show_camera = False
 
 
 # --------------------------------------------------
@@ -214,7 +240,7 @@ st.markdown(
 
 
 # --------------------------------------------------
-# File Upload
+# File uploader
 # --------------------------------------------------
 
 uploaded_files = st.file_uploader(
@@ -226,17 +252,62 @@ uploaded_files = st.file_uploader(
 
 
 # --------------------------------------------------
-# Camera
+# Icon bar
 # --------------------------------------------------
 
-camera_image = st.camera_input(
-    "Take a picture",
-    label_visibility="collapsed"
+icon_col1, icon_col2, icon_col3 = st.columns(
+    [1, 1, 1]
 )
 
+with icon_col1:
+
+    upload_clicked = st.button(
+        "📤",
+        key="upload_icon"
+    )
+
+with icon_col2:
+
+    camera_clicked = st.button(
+        "📷",
+        key="camera_icon"
+    )
+
+with icon_col3:
+
+    gallery_clicked = st.button(
+        "📋",
+        key="gallery_icon"
+    )
+
 
 # --------------------------------------------------
-# Action Buttons
+# Camera button
+# --------------------------------------------------
+
+if camera_clicked:
+
+    st.session_state.show_camera = True
+
+
+# --------------------------------------------------
+# Camera input
+# --------------------------------------------------
+
+camera_image = None
+
+if st.session_state.show_camera:
+
+    st.markdown("#### Take a picture")
+
+    camera_image = st.camera_input(
+        "Camera",
+        label_visibility="collapsed"
+    )
+
+
+# --------------------------------------------------
+# Action buttons
 # --------------------------------------------------
 
 st.write("")
@@ -268,6 +339,8 @@ if clear_clicked:
 
     st.session_state.processed_images = []
 
+    st.session_state.show_camera = False
+
     st.rerun()
 
 
@@ -279,7 +352,10 @@ if submit_clicked:
 
     st.session_state.processed_images = []
 
+    # ----------------------------------------------
     # Uploaded images
+    # ----------------------------------------------
+
     if uploaded_files:
 
         for uploaded_file in uploaded_files:
@@ -294,7 +370,11 @@ if submit_clicked:
                 processed_image
             )
 
+
+    # ----------------------------------------------
     # Camera image
+    # ----------------------------------------------
+
     elif camera_image:
 
         image = Image.open(
@@ -307,6 +387,11 @@ if submit_clicked:
             processed_image
         )
 
+
+    # ----------------------------------------------
+    # Nothing selected
+    # ----------------------------------------------
+
     else:
 
         st.warning(
@@ -315,7 +400,7 @@ if submit_clicked:
 
 
 # --------------------------------------------------
-# Display Results
+# Display processed images
 # --------------------------------------------------
 
 if st.session_state.processed_images:

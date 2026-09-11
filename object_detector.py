@@ -15,7 +15,7 @@ def draw_boundaring_boxes(image, detections):
     draw_image = image.copy()
     draw = ImageDraw.Draw(draw_image)
 
-    font = ImageFont.truetype("arial.ttf", 80)
+    font = ImageFont.load_default(size=80)
 
     label_positions = []
 

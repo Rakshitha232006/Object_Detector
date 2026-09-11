@@ -16,55 +16,92 @@ st.set_page_config(
 
 
 # --------------------------------------------------
-# CSS
+# Custom CSS
 # --------------------------------------------------
 
 st.markdown(
     """
     <style>
 
-    /* Main background */
+    /* ============================================
+       PAGE
+       ============================================ */
+
     .stApp {
         background-color: #0B0F19;
     }
 
     .main .block-container {
-        max-width: 760px;
+        max-width: 880px;
         padding-top: 35px;
+        padding-bottom: 30px;
     }
 
 
-    /* Label */
+    /* ============================================
+       LABEL
+       ============================================ */
+
     .field-label {
         color: #E5E7EB;
         font-size: 15px;
-        margin-bottom: 6px;
+        margin-bottom: 7px;
     }
 
 
-    /* --------------------------------------------
-       FILE UPLOADER
-       -------------------------------------------- */
+    /* ============================================
+       UPLOAD BOX
+       ============================================ */
 
     [data-testid="stFileUploader"] {
         background-color: #24262C !important;
         border: 1px dashed #4D5057 !important;
         border-radius: 6px !important;
         padding: 0 !important;
+        overflow: hidden !important;
     }
+
 
     [data-testid="stFileUploaderDropzone"] {
         background-color: #24262C !important;
         border: none !important;
-        min-height: 250px !important;
 
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
+        height: 310px !important;
+        min-height: 310px !important;
+
+        position: relative !important;
+
+        display: block !important;
     }
 
 
-    /* Hide Streamlit's default text */
+    /* ============================================
+       CENTER UPLOAD MESSAGE
+       ============================================ */
+
+    [data-testid="stFileUploaderDropzoneInstructions"] {
+
+        position: absolute !important;
+
+        left: 0 !important;
+        right: 0 !important;
+
+        top: 50% !important;
+
+        transform: translateY(-50%) !important;
+
+        width: 100% !important;
+
+        display: block !important;
+
+        text-align: center !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+
+    /* Hide Streamlit's original text */
 
     [data-testid="stFileUploaderDropzoneInstructions"] span {
         display: none !important;
@@ -78,139 +115,154 @@ st.markdown(
     /* Upload arrow */
 
     [data-testid="stFileUploaderDropzoneInstructions"]::before {
+
         content: "↑";
+
         display: block;
+
         text-align: center;
 
         color: #E5E7EB;
-        font-size: 42px;
+
+        font-size: 44px;
+
         font-weight: 300;
 
-        margin-bottom: 8px;
+        line-height: 1;
+
+        margin-bottom: 10px;
     }
 
 
     /* Upload text */
 
     [data-testid="stFileUploaderDropzoneInstructions"]::after {
+
         content: "Drop Image Here\\A - or -\\A Click to Upload";
 
         white-space: pre-wrap;
 
         display: block;
+
         text-align: center;
 
         color: #E5E7EB;
 
-        font-size: 16px;
+        font-size: 17px;
+
         font-weight: 500;
 
-        line-height: 1.6;
+        line-height: 1.65;
     }
 
 
-    /* Hide Browse button */
+    /* Hide default Browse button */
 
     [data-testid="stFileUploaderDropzone"] button {
         display: none !important;
     }
 
 
-    /* --------------------------------------------
-       ICON BAR
-       -------------------------------------------- */
+    /* ============================================
+       ICON ROW
+       ============================================ */
 
-    .icon-bar {
-        height: 40px;
-
-        background-color: #24262C;
-
-        border-top: 1px solid #373A40;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        gap: 24px;
-
-        color: #9CA3AF;
+    .icon-row {
+        margin-top: 0px;
+        margin-bottom: 20px;
     }
 
 
-    /* --------------------------------------------
-       ICON BUTTONS
-       -------------------------------------------- */
+    /* Icon buttons */
 
-    div.stButton > button {
+    .icon-row button {
+
+        width: 54px !important;
+        height: 54px !important;
+
+        min-height: 54px !important;
+
+        background-color: #555761 !important;
+
+        color: #E5E7EB !important;
+
         border: none !important;
+
+        border-radius: 7px !important;
+
+        padding: 0 !important;
+
+        font-size: 20px !important;
+
         box-shadow: none !important;
     }
 
 
-    .icon-button button {
-        background: transparent !important;
+    .icon-row button:hover {
 
-        color: #9CA3AF !important;
+        background-color: #62646E !important;
 
-        font-size: 20px !important;
-
-        padding: 0 !important;
-
-        height: 30px !important;
-
-        min-height: 30px !important;
+        color: #FFFFFF !important;
     }
 
 
-    .icon-button button:hover {
-        color: #FF5200 !important;
-    }
-
-
-    /* --------------------------------------------
-       CAMERA
-       -------------------------------------------- */
-
-    [data-testid="stCameraInput"] {
-        margin-top: 10px;
-    }
-
-
-    /* --------------------------------------------
+    /* ============================================
        ACTION BUTTONS
-       -------------------------------------------- */
+       ============================================ */
+
+    .action-row {
+        margin-top: 8px;
+    }
+
 
     div.stButton > button[kind="secondary"] {
+
         background-color: #555761 !important;
-        color: white !important;
 
-        border-radius: 6px !important;
+        color: #FFFFFF !important;
 
-        height: 42px !important;
+        border: none !important;
+
+        border-radius: 7px !important;
+
+        height: 52px !important;
+
+        min-height: 52px !important;
 
         font-size: 16px !important;
+
         font-weight: 600 !important;
     }
 
 
     div.stButton > button[kind="primary"] {
+
         background-color: #FF5200 !important;
-        color: white !important;
 
-        border-radius: 6px !important;
+        color: #FFFFFF !important;
 
-        height: 42px !important;
+        border: none !important;
+
+        border-radius: 7px !important;
+
+        height: 52px !important;
+
+        min-height: 52px !important;
 
         font-size: 16px !important;
+
         font-weight: 600 !important;
     }
 
 
-    /* Remove unnecessary uploader bottom spacing */
+    /* ============================================
+       CAMERA
+       ============================================ */
 
-    [data-testid="stFileUploader"] section {
-        padding-bottom: 0 !important;
+    [data-testid="stCameraInput"] {
+        margin-top: 10px;
     }
+
 
     </style>
     """,
@@ -219,7 +271,7 @@ st.markdown(
 
 
 # --------------------------------------------------
-# Session State
+# Session state
 # --------------------------------------------------
 
 if "processed_images" not in st.session_state:
@@ -252,37 +304,49 @@ uploaded_files = st.file_uploader(
 
 
 # --------------------------------------------------
-# Icon bar
+# Icon row
 # --------------------------------------------------
 
-icon_col1, icon_col2, icon_col3 = st.columns(
-    [1, 1, 1]
+st.markdown('<div class="icon-row">', unsafe_allow_html=True)
+
+# Empty space + 3 small columns + empty space
+c1, c2, c3, c4, c5 = st.columns(
+    [1, 0.12, 0.12, 0.12, 1],
+    gap="small"
 )
 
-with icon_col1:
+
+with c2:
 
     upload_clicked = st.button(
         "📤",
-        key="upload_icon"
+        key="upload_icon",
+        use_container_width=True
     )
 
-with icon_col2:
+
+with c3:
 
     camera_clicked = st.button(
         "📷",
-        key="camera_icon"
+        key="camera_icon",
+        use_container_width=True
     )
 
-with icon_col3:
+
+with c4:
 
     gallery_clicked = st.button(
         "📋",
-        key="gallery_icon"
+        key="gallery_icon",
+        use_container_width=True
     )
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 
 # --------------------------------------------------
-# Camera button
+# Camera
 # --------------------------------------------------
 
 if camera_clicked:
@@ -290,29 +354,27 @@ if camera_clicked:
     st.session_state.show_camera = True
 
 
-# --------------------------------------------------
-# Camera input
-# --------------------------------------------------
-
 camera_image = None
 
 if st.session_state.show_camera:
 
-    st.markdown("#### Take a picture")
-
     camera_image = st.camera_input(
-        "Camera",
+        "Take a picture",
         label_visibility="collapsed"
     )
 
 
 # --------------------------------------------------
-# Action buttons
+# Clear + Submit
 # --------------------------------------------------
 
-st.write("")
+st.markdown(
+    '<div class="action-row">',
+    unsafe_allow_html=True
+)
 
-col1, col2 = st.columns(2)
+col1, col2 = st.columns(2, gap="medium")
+
 
 with col1:
 
@@ -322,6 +384,7 @@ with col1:
         use_container_width=True
     )
 
+
 with col2:
 
     submit_clicked = st.button(
@@ -329,6 +392,8 @@ with col2:
         type="primary",
         use_container_width=True
     )
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 
 # --------------------------------------------------
@@ -352,9 +417,8 @@ if submit_clicked:
 
     st.session_state.processed_images = []
 
-    # ----------------------------------------------
+
     # Uploaded images
-    # ----------------------------------------------
 
     if uploaded_files:
 
@@ -371,9 +435,7 @@ if submit_clicked:
             )
 
 
-    # ----------------------------------------------
     # Camera image
-    # ----------------------------------------------
 
     elif camera_image:
 
@@ -388,10 +450,6 @@ if submit_clicked:
         )
 
 
-    # ----------------------------------------------
-    # Nothing selected
-    # ----------------------------------------------
-
     else:
 
         st.warning(
@@ -400,7 +458,7 @@ if submit_clicked:
 
 
 # --------------------------------------------------
-# Display processed images
+# Results
 # --------------------------------------------------
 
 if st.session_state.processed_images:

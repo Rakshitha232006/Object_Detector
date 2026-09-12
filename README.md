@@ -34,6 +34,8 @@ pipeline(
     "object-detection",
     model="facebook/detr-resnet-50"
 )
+
+
 🛠️ Technologies Used
 Python
 Streamlit
@@ -42,6 +44,8 @@ PyTorch
 Torchvision
 Pillow
 Timm
+
+
 📂 Project Structure
 Object_Detector/
 │
@@ -49,6 +53,8 @@ Object_Detector/
 ├── object_detector.py
 ├── requirements.txt
 └── README.md
+
+
 ⚙️ How It Works
 User
  │
@@ -70,7 +76,10 @@ User
           │
           ▼
    Display Result Image
+
+
 💻 Run Locally
+
 1. Clone the repository
 git clone https://github.com/Rakshitha232006/Object_Detector.git
 2. Navigate to the project
@@ -78,15 +87,15 @@ cd Object_Detector
 3. Create a virtual environment
 python -m venv .venv
 4. Activate the virtual environment
-
 Windows:
-
 .venv\Scripts\activate
 5. Install dependencies
 pip install -r requirements.txt
 6. Run the application
 streamlit run main.py
+
 📸 Using the Application
+
 Upload an Image
 Open the application.
 Select one or more JPG, JPEG, or PNG images.

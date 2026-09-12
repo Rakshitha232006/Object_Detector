@@ -1,13 +1,24 @@
 from PIL import Image, ImageDraw, ImageFont
 from transformers import pipeline
+import streamlit as st
 
 
+# --------------------------------------------------
 # Load DETR model
-object_detector = pipeline(
-    "object-detection",
-    model="facebook/detr-resnet-50"
-)
+# --------------------------------------------------
 
+@st.cache_resource
+def load_model():
+
+    return pipeline(
+        "object-detection",
+        model="facebook/detr-resnet-50"
+    )
+
+
+# --------------------------------------------------
+# Draw bounding boxes
+# --------------------------------------------------
 
 def draw_boundaring_boxes(image, detections):
 
@@ -15,11 +26,20 @@ def draw_boundaring_boxes(image, detections):
     draw = ImageDraw.Draw(draw_image)
 
     # Medium-sized font
-    font_size = max(24, int(draw_image.width / 60))
+    font_size = max(
+        24,
+        int(draw_image.width / 60)
+    )
 
     try:
-        font = ImageFont.truetype("arial.ttf", font_size)
+
+        font = ImageFont.truetype(
+            "arial.ttf",
+            font_size
+        )
+
     except:
+
         font = ImageFont.load_default()
 
     label_positions = []
@@ -33,12 +53,19 @@ def draw_boundaring_boxes(image, detections):
         xmax = int(box["xmax"])
         ymax = int(box["ymax"])
 
+        # ------------------------------------------
         # Bounding box
+        # ------------------------------------------
+
         draw.rectangle(
             [(xmin, ymin), (xmax, ymax)],
             outline="red",
             width=5
         )
+
+        # ------------------------------------------
+        # Label and confidence
+        # ------------------------------------------
 
         label = detection["label"]
         score = detection["score"]
@@ -54,30 +81,43 @@ def draw_boundaring_boxes(image, detections):
         text_width = bbox[2] - bbox[0]
         text_height = bbox[3] - bbox[1]
 
-        # Put label at the top of the bounding box
+        # ------------------------------------------
+        # Label position
+        # ------------------------------------------
+
         text_x = xmin
         text_y = ymin
 
         # Keep label inside image
         if text_x + text_width > draw_image.width:
+
             text_x = draw_image.width - text_width
 
         if text_y + text_height > draw_image.height:
+
             text_y = draw_image.height - text_height
 
+        # ------------------------------------------
         # Avoid overlapping labels
+        # ------------------------------------------
+
         while any(
             abs(text_y - previous_y) < text_height + 5
             and abs(text_x - previous_x) < text_width
             for previous_x, previous_y in label_positions
         ):
+
             text_y += text_height + 5
 
             if text_y + text_height > draw_image.height:
+
                 text_y = ymin
                 break
 
+        # ------------------------------------------
         # Label background
+        # ------------------------------------------
+
         draw.rectangle(
             [
                 text_x,
@@ -88,7 +128,10 @@ def draw_boundaring_boxes(image, detections):
             fill="red"
         )
 
+        # ------------------------------------------
         # Label text
+        # ------------------------------------------
+
         draw.text(
             (text_x, text_y),
             text,
@@ -103,16 +146,29 @@ def draw_boundaring_boxes(image, detections):
     return draw_image
 
 
+# --------------------------------------------------
+# Detect objects
+# --------------------------------------------------
+
 def detect_objects(image):
 
     if image is None:
-        return None
 
-    output = object_detector(image)
+        return None, []
 
+    # Load cached model
+    object_detector = load_model()
+
+    # Detect objects
+    output = object_detector(
+        image,
+        threshold=0.3
+    )
+
+    # Draw boxes
     processed_image = draw_boundaring_boxes(
         image,
         output
     )
 
-    return processed_image
+    return processed_image, output
